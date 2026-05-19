@@ -1,0 +1,60 @@
+# Build output
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.pidb
+*.userprefs
+*.dll
+*.pdb
+*.exe
+
+# Visual Studio
+.vs/
+*.vsidx
+*.VC.db
+*.VC.opendb
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+*.snupkg
+nuget.exe
+packages/
+.nuget/
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage*.xml
+coverage*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Private operator files (never committed)
+.private/
+*.dpapi
+*.local.md
+local.md
+
+# AI-authored one-shot dev_ops scripts (per Recto Hard Rule #10 they
+# self-delete after success; the .gitignore is belt-and-suspenders so
+# `git add -A` never stages a transient gscript into a real commit).
+gscript_*.ps1
+gscript.ps1
+faxscript_*.ps1
+dscript_*.ps1
+tscript_*.ps1
+vscript_*.ps1
+lscript_*.ps1
+bscript_*.ps1
+xscript_*.ps1
