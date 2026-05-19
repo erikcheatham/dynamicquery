@@ -6,9 +6,6 @@ namespace DynamicQuery.Core;
 /// function call, cast, etc. Emits as
 /// <c>&lt;expression&gt; AS "&lt;PropertyName&gt;"</c>.
 /// </summary>
-/// <param name="sqlExpression">Raw SQL expression for this column.
-/// Examples: <c>"r.id"</c>, <c>"m.title"</c>,
-/// <c>"COUNT(r.id) OVER (PARTITION BY r.author_id)"</c>.</param>
 /// <example>
 /// <code>
 /// [Column("r.id")]
@@ -29,6 +26,13 @@ public sealed class ColumnAttribute : Attribute
     /// <summary>The raw SQL expression mapped to this property.</summary>
     public string SqlExpression { get; }
 
+    /// <summary>
+    /// Constructs a column projection mapping the SQL expression to the
+    /// property it decorates.
+    /// </summary>
+    /// <param name="sqlExpression">Raw SQL expression for this column.
+    /// Examples: <c>"r.id"</c>, <c>"m.title"</c>,
+    /// <c>"COUNT(r.id) OVER (PARTITION BY r.author_id)"</c>.</param>
     public ColumnAttribute(string sqlExpression)
     {
         if (string.IsNullOrWhiteSpace(sqlExpression))

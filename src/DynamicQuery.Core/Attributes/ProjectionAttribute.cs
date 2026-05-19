@@ -5,10 +5,6 @@ namespace DynamicQuery.Core;
 /// Required on every type that DynamicQuery's <see cref="ProjectionRegistry"/>
 /// inspects; the descriptor build throws if missing.
 /// </summary>
-/// <param name="table">Base table name (raw SQL identifier, including
-/// schema-qualifier if needed, e.g. <c>"reviews"</c> or <c>"civic.users"</c>).</param>
-/// <param name="alias">Short alias the rest of the projection's SQL
-/// fragments reference (e.g. <c>"r"</c>).</param>
 /// <example>
 /// <code>
 /// [Projection("reviews", "r")]
@@ -25,6 +21,13 @@ public sealed class ProjectionAttribute : Attribute
     /// <summary>The alias used by JOINs + column references downstream.</summary>
     public string Alias { get; }
 
+    /// <summary>
+    /// Constructs a new projection declaration for the given base table + alias.
+    /// </summary>
+    /// <param name="table">Base table name (raw SQL identifier, including
+    /// schema-qualifier if needed, e.g. <c>"reviews"</c> or <c>"civic.users"</c>).</param>
+    /// <param name="alias">Short alias the rest of the projection's SQL
+    /// fragments reference (e.g. <c>"r"</c>).</param>
     public ProjectionAttribute(string table, string alias)
     {
         if (string.IsNullOrWhiteSpace(table))

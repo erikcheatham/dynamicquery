@@ -35,6 +35,14 @@ public sealed class ProjectionDescriptor
     /// </summary>
     public string FromClause { get; }
 
+    /// <summary>
+    /// Constructs a new descriptor. Normally only the
+    /// <see cref="ProjectionRegistry"/> calls this; consumer code reaches
+    /// instances via <see cref="ProjectionRegistry.GetDescriptor{T}"/>.
+    /// </summary>
+    /// <param name="targetType">The DTO type this descriptor describes.</param>
+    /// <param name="selectColumns">The column projection fragment.</param>
+    /// <param name="fromClause">The FROM block fragment.</param>
     public ProjectionDescriptor(Type targetType, string selectColumns, string fromClause)
     {
         TargetType = targetType ?? throw new ArgumentNullException(nameof(targetType));

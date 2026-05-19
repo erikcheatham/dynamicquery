@@ -47,6 +47,12 @@ public static class DapperProjectionExtensions
     /// <summary>
     /// Single-row variant. Returns <c>default(T)</c> when no row matches.
     /// </summary>
+    /// <typeparam name="T">DTO type with a [Projection] attribute.</typeparam>
+    /// <param name="connection">Open or closed IDbConnection.</param>
+    /// <param name="where">Optional WHERE clause body (without the
+    /// <c>WHERE</c> keyword).</param>
+    /// <param name="parameters">Dapper parameter object.</param>
+    /// <param name="commandTimeout">Optional Dapper command timeout.</param>
     public static Task<T?> QueryProjectionSingleOrDefaultAsync<T>(
         this IDbConnection connection,
         string? where = null,
@@ -60,6 +66,12 @@ public static class DapperProjectionExtensions
     /// <summary>
     /// Single-row variant that throws when no row matches.
     /// </summary>
+    /// <typeparam name="T">DTO type with a [Projection] attribute.</typeparam>
+    /// <param name="connection">Open or closed IDbConnection.</param>
+    /// <param name="where">Optional WHERE clause body (without the
+    /// <c>WHERE</c> keyword).</param>
+    /// <param name="parameters">Dapper parameter object.</param>
+    /// <param name="commandTimeout">Optional Dapper command timeout.</param>
     public static Task<T> QueryProjectionSingleAsync<T>(
         this IDbConnection connection,
         string? where = null,

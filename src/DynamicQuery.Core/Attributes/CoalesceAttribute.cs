@@ -7,9 +7,6 @@ namespace DynamicQuery.Core;
 /// fallback chains where the projection joins multiple tables and
 /// only one is populated per row.
 /// </summary>
-/// <param name="sqlExpressions">Two or more raw SQL expressions.
-/// Each can be any SQL fragment, including nested function calls
-/// like <c>NULLIF(...)</c> or jsonb path extractors.</param>
 /// <example>
 /// <code>
 /// [Coalesce("m.title", "r.standalone_title")]
@@ -32,6 +29,13 @@ public sealed class CoalesceAttribute : Attribute
     /// <summary>The list of SQL expressions, in COALESCE order.</summary>
     public string[] SqlExpressions { get; }
 
+    /// <summary>
+    /// Constructs a COALESCE projection over two or more SQL expressions
+    /// evaluated in order.
+    /// </summary>
+    /// <param name="sqlExpressions">Two or more raw SQL expressions.
+    /// Each can be any SQL fragment, including nested function calls
+    /// like <c>NULLIF(...)</c> or jsonb path extractors.</param>
     public CoalesceAttribute(params string[] sqlExpressions)
     {
         if (sqlExpressions is null || sqlExpressions.Length < 2)

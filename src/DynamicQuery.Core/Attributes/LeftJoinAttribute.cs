@@ -4,12 +4,6 @@ namespace DynamicQuery.Core;
 /// Appends a <c>LEFT JOIN</c> to the projection's FROM block. Repeatable;
 /// joins emit in declaration order on the class.
 /// </summary>
-/// <param name="table">Joined table name (raw SQL identifier, schema-
-/// qualified if needed).</param>
-/// <param name="alias">Alias to reference the joined table downstream
-/// (e.g. <c>"m"</c> for media).</param>
-/// <param name="onCondition">Raw SQL <c>ON</c> condition (without the
-/// <c>ON</c> keyword), e.g. <c>"r.media_id = m.id"</c>.</param>
 /// <example>
 /// <code>
 /// [Projection("reviews", "r")]
@@ -36,6 +30,15 @@ public sealed class LeftJoinAttribute : Attribute
     /// <summary>The raw SQL ON condition (without leading <c>ON</c>).</summary>
     public string OnCondition { get; }
 
+    /// <summary>
+    /// Constructs a new LEFT JOIN declaration.
+    /// </summary>
+    /// <param name="table">Joined table name (raw SQL identifier, schema-
+    /// qualified if needed).</param>
+    /// <param name="alias">Alias to reference the joined table downstream
+    /// (e.g. <c>"m"</c> for media).</param>
+    /// <param name="onCondition">Raw SQL <c>ON</c> condition (without the
+    /// <c>ON</c> keyword), e.g. <c>"r.media_id = m.id"</c>.</param>
     public LeftJoinAttribute(string table, string alias, string onCondition)
     {
         if (string.IsNullOrWhiteSpace(table))

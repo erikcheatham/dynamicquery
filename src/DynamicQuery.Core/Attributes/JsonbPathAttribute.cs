@@ -10,10 +10,6 @@ namespace DynamicQuery.Core;
 /// access, fall back to <see cref="ColumnAttribute"/> with the raw jsonb
 /// SQL expression.
 /// </summary>
-/// <param name="column">The jsonb column reference (e.g.
-/// <c>"r.content_json"</c>).</param>
-/// <param name="index">The array index to dereference with <c>-&gt; N</c>.</param>
-/// <param name="key">The key to extract as text with <c>-&gt;&gt; 'key'</c>.</param>
 /// <example>
 /// <code>
 /// [JsonbPath("r.content_json", 0, "platform")]
@@ -42,6 +38,15 @@ public sealed class JsonbPathAttribute : Attribute
     /// <summary>The key to extract as text.</summary>
     public string Key { get; }
 
+    /// <summary>
+    /// Constructs a jsonb path projection extracting <paramref name="key"/>
+    /// from the array element at <paramref name="index"/> of
+    /// <paramref name="column"/>.
+    /// </summary>
+    /// <param name="column">The jsonb column reference (e.g.
+    /// <c>"r.content_json"</c>).</param>
+    /// <param name="index">The array index to dereference with <c>-&gt; N</c>.</param>
+    /// <param name="key">The key to extract as text with <c>-&gt;&gt; 'key'</c>.</param>
     public JsonbPathAttribute(string column, int index, string key)
     {
         if (string.IsNullOrWhiteSpace(column))

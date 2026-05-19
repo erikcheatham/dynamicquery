@@ -40,6 +40,7 @@ public static class ProjectionRegistry
     /// Non-generic accessor. Useful when the type is only known at
     /// runtime (open-generic dispatchers, dynamic projection composition).
     /// </summary>
+    /// <param name="type">The DTO type to inspect for projection attributes.</param>
     public static ProjectionDescriptor GetDescriptor(Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
