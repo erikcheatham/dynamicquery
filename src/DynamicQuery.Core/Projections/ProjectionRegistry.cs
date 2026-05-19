@@ -7,8 +7,8 @@ namespace DynamicQuery.Core;
 /// <summary>
 /// Static entry point for DynamicQuery's reflection-based projection
 /// build. Caches a <see cref="ProjectionDescriptor"/> per type for the
-/// process lifetime; first call per <typeparamref name="T"/> does the
-/// reflection scan, subsequent calls are dictionary lookups.
+/// process lifetime; first call per DTO type does the reflection scan,
+/// subsequent calls are dictionary lookups.
 /// </summary>
 /// <remarks>
 /// <para>v0.1 is the runtime-only implementation. v1.0's source generator
