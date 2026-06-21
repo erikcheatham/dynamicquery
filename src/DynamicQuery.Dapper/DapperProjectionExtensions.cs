@@ -1,7 +1,8 @@
 using System.Data;
 using Dapper;
+using DynamicQuery.Core;
 
-namespace DynamicQuery.Core;
+namespace DynamicQuery.Dapper;
 
 /// <summary>
 /// Optional convenience extensions composing
@@ -11,6 +12,12 @@ namespace DynamicQuery.Core;
 /// using <see cref="ProjectionRegistry.GetSelectColumns{T}"/> and
 /// <see cref="ProjectionRegistry.GetFromClause{T}"/> directly.
 /// </summary>
+/// <remarks>
+/// Moved to the <c>DynamicQuery.Dapper</c> package in v0.1.1 so the core
+/// (<c>DynamicQuery.Core</c>) stays dependency-free. Consumers who used these
+/// via <c>using DynamicQuery.Core;</c> add a <c>using DynamicQuery.Dapper;</c>
+/// plus the <c>DynamicQuery.Dapper</c> package reference.
+/// </remarks>
 public static class DapperProjectionExtensions
 {
     /// <summary>

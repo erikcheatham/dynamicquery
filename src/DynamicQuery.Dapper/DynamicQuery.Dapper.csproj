@@ -11,10 +11,10 @@
 
   <PropertyGroup>
     <!-- NuGet package metadata -->
-    <PackageId>DynamicQuery.Core</PackageId>
+    <PackageId>DynamicQuery.Dapper</PackageId>
     <Version>0.1.1</Version>
     <Authors>Erik Cheatham</Authors>
-    <Description>Attribute-driven SQL projection for .NET. Declare DTO columns once with [Projection]/[LeftJoin]/[Column]/[Coalesce]/[JsonbPath] attributes; DynamicQuery composes the SELECT projection and JOIN block. Pairs with Dapper.</Description>
+    <Description>Dapper execution layer for DynamicQuery: IDbConnection.QueryProjectionAsync&lt;T&gt; extensions that compose DynamicQuery.Core's attribute-driven SELECT/FROM into Dapper queries. Server-side companion to the dependency-free DynamicQuery.Core.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/erikcheatham/dynamicquery</PackageProjectUrl>
     <RepositoryUrl>https://github.com/erikcheatham/dynamicquery</RepositoryUrl>
@@ -25,10 +25,13 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <!-- v0.1.1: Dapper dependency removed. DynamicQuery.Core is now dependency-free,
-       so it is safe to add to DTO-only assemblies (consumed by client bundles)
-       without dragging Dapper transitively. The Dapper extension methods moved to
-       the sibling DynamicQuery.Dapper package. -->
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DynamicQuery.Core\DynamicQuery.Core.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />

@@ -1,0 +1,53 @@
+name: publish
+
+# Publishes DynamicQuery.Core + DynamicQuery.Dapper to NuGet on a v* tag,
+# via NuGet Trusted Publishing (OIDC) -- no stored API key.
+#
+# One-time setup:
+#   1. nuget.org -> your username -> Trusted Publishing -> Create a policy:
+#        Repository Owner: erikcheatham
+#        Repository:       dynamicquery
+#        Workflow File:    publish.yml      (file name only, no path)
+#        Environment:      (leave blank)
+#   2. This repo -> Settings -> Secrets and variables -> Actions -> Variables:
+#        New repository variable  NUGET_USER = <your nuget.org profile name>
+#   3. git tag v0.1.1 && git push origin v0.1.1     (or run from the Actions tab)
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # enable GitHub OIDC token issuance (Trusted Publishing)
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      # Packs the two packable projects (Core + Dapper); the test project is
+      # IsPackable=false and is skipped. Symbols (.snupkg) emit alongside.
+      - name: Pack
+        run: dotnet pack DynamicQuery.sln -c Release -o ./artifacts
+
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      # dotnet nuget push auto-includes the matching .snupkg symbol package.
+      - name: Push to NuGet
+        run: >
+          dotnet nuget push "./artifacts/*.nupkg"
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
