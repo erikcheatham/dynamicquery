@@ -23,11 +23,16 @@ the entire verbatim-string-fragility class) is the next milestone — see
 ## Quick start
 
 ```bash
-dotnet add package DynamicQuery.Core
+# DynamicQuery.Core carries the attributes and is dependency-free (safe in
+# DTO-only assemblies). DynamicQuery.Dapper adds the QueryProjectionAsync
+# extensions and brings Core transitively, so for the full quick-start below
+# just add Dapper; add Core alone when you only need to annotate DTOs.
+dotnet add package DynamicQuery.Dapper
 ```
 
 ```csharp
-using DynamicQuery.Core;
+using DynamicQuery.Core;     // [Projection]/[LeftJoin]/[Column]/[Coalesce]/[JsonbPath]
+using DynamicQuery.Dapper;   // IDbConnection.QueryProjectionAsync(...) extension
 using Dapper;
 using Npgsql;
 
