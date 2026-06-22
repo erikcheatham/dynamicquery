@@ -67,6 +67,25 @@ public static class ProjectionRegistry
     /// </summary>
     public static void ClearCache() => Cache.Clear();
 
+    /// <summary>
+    /// Pre-populates the cache with a compile-time-generated descriptor for
+    /// <paramref name="type"/>. The source generator emits one
+    /// <see cref="System.Runtime.CompilerServices.ModuleInitializerAttribute"/> call to this per
+    /// annotated DTO, so <see cref="GetDescriptor(Type)"/> returns the generated SQL without ever
+    /// running reflection. First registration wins (<c>TryAdd</c>); the runtime reflection
+    /// <c>Build</c> path stays the fallback for types the generator did not see (runtime-dynamic
+    /// composition, design-time tooling). Byte-identical to the reflection path by construction —
+    /// the generator mirrors <c>Build</c>'s emission and is pinned against it by test.
+    /// </summary>
+    /// <param name="type">The DTO type the generated descriptor describes.</param>
+    /// <param name="selectColumns">The generated SELECT projection (no leading <c>SELECT</c>).</param>
+    /// <param name="fromClause">The generated FROM block (no leading <c>FROM</c>).</param>
+    public static void RegisterGenerated(Type type, string selectColumns, string fromClause)
+    {
+        ArgumentNullException.ThrowIfNull(type);
+        Cache.TryAdd(type, new ProjectionDescriptor(type, selectColumns, fromClause));
+    }
+
     // ─────────────────────────────────────────────────────────────────
     // Internal: build path. Runs once per type per process.
     // ─────────────────────────────────────────────────────────────────

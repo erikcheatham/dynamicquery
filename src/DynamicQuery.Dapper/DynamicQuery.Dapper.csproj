@@ -12,7 +12,7 @@
   <PropertyGroup>
     <!-- NuGet package metadata -->
     <PackageId>DynamicQuery.Dapper</PackageId>
-    <Version>0.1.1</Version>
+    <Version>0.2.0</Version>
     <Authors>Erik Cheatham</Authors>
     <Description>Dapper execution layer for DynamicQuery: IDbConnection.QueryProjectionAsync&lt;T&gt; extensions that compose DynamicQuery.Core's attribute-driven SELECT/FROM into Dapper queries. Server-side companion to the dependency-free DynamicQuery.Core.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

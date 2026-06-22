@@ -14,10 +14,15 @@
     <PackageReference Include="xunit" Version="2.9.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <!-- Drives the generator in-process for the byte-identity test (CSharpGeneratorDriver). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DynamicQuery.Core\DynamicQuery.Core.csproj" />
+    <!-- Plain reference (NOT OutputItemType=Analyzer): exposes ProjectionSourceGenerator so the test
+         can instantiate it; does not auto-run it on this test assembly. -->
+    <ProjectReference Include="..\..\src\DynamicQuery.SourceGenerator\DynamicQuery.SourceGenerator.csproj" />
   </ItemGroup>
 
 </Project>

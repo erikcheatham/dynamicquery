@@ -11,7 +11,7 @@ name: publish
 #        Environment:      (leave blank)
 #   2. This repo -> Settings -> Secrets and variables -> Actions -> Variables:
 #        New repository variable  NUGET_USER = <your nuget.org profile name>
-#   3. git tag v0.1.1 && git push origin v0.1.1     (or run from the Actions tab)
+#   3. git tag v0.2.0 && git push origin v0.2.0     (or run from the Actions tab)
 on:
   push:
     tags: ['v*']

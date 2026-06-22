@@ -12,7 +12,7 @@
   <PropertyGroup>
     <!-- NuGet package metadata -->
     <PackageId>DynamicQuery.Core</PackageId>
-    <Version>0.1.1</Version>
+    <Version>0.2.0</Version>
     <Authors>Erik Cheatham</Authors>
     <Description>Attribute-driven SQL projection for .NET. Declare DTO columns once with [Projection]/[LeftJoin]/[Column]/[Coalesce]/[JsonbPath] attributes; DynamicQuery composes the SELECT projection and JOIN block. Pairs with Dapper.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -29,6 +29,22 @@
        so it is safe to add to DTO-only assemblies (consumed by client bundles)
        without dragging Dapper transitively. The Dapper extension methods moved to
        the sibling DynamicQuery.Dapper package. -->
+
+  <!-- Source generator (v0.2): ships INSIDE this package as a Roslyn analyzer, so a consumer that
+       references DynamicQuery.Core gets the attributes AND compile-time SELECT/FROM emission with a
+       zero-reflection runtime fast-path. OutputItemType=Analyzer + ReferenceOutputAssembly=false =
+       build-time only, never a runtime dependency. The <None> packs the built generator DLL into the
+       nupkg's analyzers/dotnet/cs path (the convention the SDK loads generators from). At
+       'dotnet pack -c Release' the ProjectReference builds the generator first, so the Release DLL
+       exists at the packed path. -->
+  <ItemGroup>
+    <ProjectReference Include="..\DynamicQuery.SourceGenerator\DynamicQuery.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\DynamicQuery.SourceGenerator\bin\$(Configuration)\netstandard2.0\DynamicQuery.SourceGenerator.dll"
+          Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />

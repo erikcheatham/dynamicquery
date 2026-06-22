@@ -123,14 +123,70 @@ specific JOIN ordering can re-arrange the attribute order on the class.
 - **Thread safety**: `ConcurrentDictionary` makes concurrent reads + first-
   write safe. The descriptor itself is immutable.
 
+## Source generator (shipped 0.2.0, 2026-06-21)
+
+The compile-time emission path. A Roslyn `IIncrementalGenerator`
+(`DynamicQuery.SourceGenerator`) reads the same attribute shapes from the
+consumer's DTO definitions at compile time and emits, per `[Projection]` DTO,
+a registrar in the `DynamicQuery.Generated` namespace:
+
+```csharp
+internal static class MyApp_Dtos_ReviewDTO_DynamicQueryProjection
+{
+    public const string SelectColumns = "r.id AS \"Id\",\n    COALESCE(...) AS \"Title\"";
+    public const string FromClause = "reviews r\n    LEFT JOIN media m ON ...";
+
+    [ModuleInitializer]
+    internal static void Register()
+        => ProjectionRegistry.RegisterGenerated(typeof(ReviewDTO), SelectColumns, FromClause);
+}
+```
+
+The `[ModuleInitializer]` runs on assembly load and pre-populates the same
+`ConcurrentDictionary` the reflection path uses, so a consumer's
+`GetSelectColumns<T>()` returns the const with **zero runtime reflection** —
+no first-call scan, AOT-friendly, the const visible to "Find All References."
+
+**Byte-identity is the contract.** The generator's string-building mirrors
+`ProjectionRegistry.Build` exactly (fragment join `",\n    "`; per-join
+`"\n    LEFT JOIN t a ON on"`; the three per-attribute fragment formats). A
+test (`GeneratorByteIdentityTests`) runs the generator on a DTO's source AND
+compiles + loads the *same* source to get the runtime value, then asserts the
+generator's emitted literal equals `SymbolDisplay.FormatLiteral` of the runtime
+output. One source of truth → the two paths cannot drift. This is why the
+generator is "a fast-path, never a behavior change."
+
+**Fail-safe to the runtime.** The generator skips any DTO it cannot emit
+identically — a property carrying more than one of
+`[Column]`/`[Coalesce]`/`[JsonbPath]`, a DTO that would yield zero columns, or
+(today's known limitation) a DTO that annotates members inherited from a base
+class (the generator scans declared members; the runtime walks the full
+`GetProperties` set). Skipped DTOs fall through to `RegisterGenerated` never
+being called for them, so `GetDescriptor` runs the reflection `Build`, which
+throws the precise diagnostic for the malformed cases. The generator never
+masks an error and never silently emits wrong SQL.
+
+**Packaged as an analyzer inside Core.** `DynamicQuery.Core.csproj` references
+the generator with `OutputItemType="Analyzer" ReferenceOutputAssembly="false"`
+(build-time only, no runtime dependency) and packs the built generator DLL into
+the nupkg's `analyzers/dotnet/cs` path. A consumer referencing the
+`DynamicQuery.Core` *package* therefore gets the attributes AND the generator
+with a single reference — no separate analyzer package to add.
+
+**v1.0 (API-lock) still pending.** The generator substrate shipped early; the
+v1.0 milestone is the attribute-contract freeze plus the remaining exit
+criteria (incremental-perf validation per Microsoft's sub-100ms target,
+production-consumer-under-load). The incremental model is currently keyed on a
+three-string value record (fully-qualified name + rendered SELECT + rendered
+FROM), which gives correct structural caching; tightening it further (e.g. an
+`EquatableArray` over the pre-render shape) is a v1.0 perf-tuning item.
+
 ## What v0.1 does NOT do
 
-- **No source generator.** Compile-time emission is v1.0. v0.1 is pure
-  runtime reflection. Source generators are AOT-compatible and remove
-  the first-call cost, but they're a separate, larger project (Roslyn
-  syntax tree analysis, incremental generation, debugging through
-  generated code). Shipping the runtime first lets us validate the
-  attribute shape + the API contract before locking it into a generator.
+- **Source generator shipped in 0.2.0** (see the section above). The runtime
+  reflection path remains load-bearing as the fallback for types the generator
+  can't statically see (runtime-dynamic composition, design-time tooling,
+  base-class-inherited annotations).
 - **No write support.** EF Core handles writes via change tracking
   (better tooling, better dialect support, automatic concurrency
   detection). DynamicQuery is read-side only.
