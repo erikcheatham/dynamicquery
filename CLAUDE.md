@@ -6,19 +6,12 @@ This file is committed and public; anything operator-specific or
 infrastructure-related lives in `%USERPROFILE%\private\local.md` (private
 memo, never in this tree).
 
-## Conversation startup ritual
+## Startup (restructured 2026-07-14)
 
-Before responding to the first message of a new conversation, an AI
-assistant should silently load these in order. Don't narrate the read-pass.
-
-1. **`%USERPROFILE%\private\local.md`** if it exists — operator-specific
-   overrides (machine identification, git author identity, PAT location).
-2. **This file** (`CLAUDE.md`) — you're here.
-3. **`README.md`** — public pitch + quick start.
-4. **`ARCHITECTURE.md`** — design doc covering attributes, the
-   ProjectionRegistry runtime, SQL emission rules, future source-generator plan.
-5. **`ROADMAP.md`** — phased plan v0.1 → v1.0.
-6. **`CHANGELOG.md`** — recent shipped work.
+The operator hub (private, auto-injected in the operator's sessions) carries identity +
+the live queue; public contributors need only this file. Read on demand per task:
+`README.md` (pitch + quick start) · `ARCHITECTURE.md` (attributes, ProjectionRegistry,
+SQL emission, source-generator plan) · `ROADMAP.md` (v0.1 -> v1.0) · `CHANGELOG.md`.
 
 ## Hard rules (non-negotiable)
 
