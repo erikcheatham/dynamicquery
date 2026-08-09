@@ -12,6 +12,36 @@ source generator).
 > milestone**, gated on its exit criteria (incremental-perf validation,
 > production-consumer-under-load, attribute API freeze).
 
+## Owed before v1.0's API lock (added 2026-08-09 after a consumer-side audit)
+
+Four items, none of them features, all of them things an API freeze would
+cement. Ordered by how quietly each currently fails:
+
+1. **A test project for `DynamicQuery.Dapper`.** `BuildSql<T>` composes the whole
+   `WHERE`/`ORDER BY`/`LIMIT` surface and has **zero** coverage. Every claim
+   about how the composed SQL behaves is currently untested.
+2. **A documented statement of SUPPORTED PROPERTY SHAPES.** The library binds
+   flat scalars that Dapper can materialize. A strongly-typed ID, a
+   multi-property value object, or a collection navigation compiles fine, emits
+   valid SQL, and dies at materialization — and nothing anywhere says so. This
+   is the single highest-value doc change: consumers arriving from a rich
+   domain model have no signal until runtime.
+3. **Fixtures that pin the converted-type behaviour.** Every existing fixture is
+   `Guid` + `string`. Add an enum, a `readonly record struct` ID, and a value
+   object, and assert what actually happens — including that a converted enum
+   sorts by its provider type (alphabetically), which is correct behaviour and
+   should be *pinned* rather than discovered.
+4. **A ruling on `orderBy`.** It is unvalidated concatenation and the natural
+   landing spot for user input. Either guard it (an allowlist of sortable
+   aliases derived from the descriptor is the obvious shape, and the descriptor
+   already knows every alias) or document it as caller-trusted SQL. Silence is
+   the one option that ages badly.
+
+**Explicitly NOT owed: teaching the library about EF value converters.** That
+would require depending on `IModel`/`IProperty`, which is hard rule 2 straight
+into the bin. The blindness is the design; the fix is documentation and pinning
+tests, not metadata coupling.
+
 ## v0.1 — shipping now (public preview)
 
 **Runtime reflection + attribute parsing**, cached per type. The minimum

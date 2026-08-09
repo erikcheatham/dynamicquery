@@ -15,10 +15,21 @@ both stumble on at scale.
 
 ## Status
 
-**v0.1 — runtime-only, public preview.** A source generator that emits the
-SELECT / JOIN constants at compile time (eliminating reflection cost AND
-the entire verbatim-string-fragility class) is the next milestone — see
-`ROADMAP.md`.
+**v0.2.0 — public preview, source generator SHIPPED.** The generator emits the
+SELECT / JOIN constants at compile time (eliminating reflection cost AND the
+entire verbatim-string-fragility class) and pre-registers them via a
+`[ModuleInitializer]`, so a generated projection costs zero runtime reflection.
+The reflection path remains as the fallback for any DTO the generator skips.
+Next milestone is the v1.0 API lock — see `ROADMAP.md`.
+
+**What this library binds:** flat DTOs of scalars Dapper can materialize. It
+reads only each property's NAME (as a SQL alias) and never inspects its type, so
+strongly-typed IDs, multi-property value objects, and collection navigations
+compile and emit valid SQL but fail at Dapper materialization unless you register
+your own `SqlMapper.TypeHandler<T>`. `WHERE` and `ORDER BY` are caller-supplied
+SQL, passed through verbatim — including the consequence that a column stored via
+an ORM value conversion (an enum saved as text, say) sorts by the STORED value,
+not the declared order.
 
 ## Quick start
 

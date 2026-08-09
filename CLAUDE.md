@@ -55,6 +55,13 @@ SQL emission, source-generator plan) · `ROADMAP.md` (v0.1 -> v1.0) · `CHANGELO
 
 ## Repo layout
 
+Corrected 2026-08-09 — the block below had been stale since v0.1.1: it showed a
+Dapper dependency on Core (Core is dependency-free), put
+`DapperProjectionExtensions.cs` under `Core/Extensions/` (it moved to its own
+project), and omitted both `DynamicQuery.Dapper` and `DynamicQuery.SourceGenerator`
+entirely. A layout map that lies is worse than no map, because it is the first
+thing a contributor trusts.
+
 ```
 dynamicquery/
 ├── README.md                            Public pitch + quick start
@@ -66,24 +73,30 @@ dynamicquery/
 ├── .gitignore
 ├── DynamicQuery.sln                     Solution
 ├── src/
-│   └── DynamicQuery.Core/
-│       ├── DynamicQuery.Core.csproj     net8.0; Dapper dep
-│       ├── Attributes/
-│       │   ├── ProjectionAttribute.cs   [Projection("table", "alias")]
-│       │   ├── LeftJoinAttribute.cs     [LeftJoin("table", "alias", "on")]
-│       │   ├── ColumnAttribute.cs       [Column("sql_expr")]
-│       │   ├── CoalesceAttribute.cs     [Coalesce("expr1", "expr2", ...)]
-│       │   └── JsonbPathAttribute.cs    [JsonbPath("col", N, "key")] (Postgres)
-│       ├── Projections/
-│       │   ├── ProjectionDescriptor.cs  Built result: SelectColumns + FromClause
-│       │   └── ProjectionRegistry.cs    Cached reflection entry point
-│       └── Extensions/
-│           └── DapperProjectionExtensions.cs   QueryProjectionAsync<T> sugar
+│   ├── DynamicQuery.Core/               ZERO PackageReferences — by design
+│   │   ├── DynamicQuery.Core.csproj     net8.0; also PACKS the generator as an analyzer
+│   │   ├── Attributes/
+│   │   │   ├── ProjectionAttribute.cs   [Projection("table", "alias")]
+│   │   │   ├── LeftJoinAttribute.cs     [LeftJoin("table", "alias", "on")]
+│   │   │   ├── ColumnAttribute.cs       [Column("sql_expr")]
+│   │   │   ├── CoalesceAttribute.cs     [Coalesce("expr1", "expr2", ...)]
+│   │   │   └── JsonbPathAttribute.cs    [JsonbPath("col", N, "key")] (Postgres)
+│   │   └── Projections/
+│   │       ├── ProjectionDescriptor.cs  Built result: SelectColumns + FromClause (NON-generic)
+│   │       └── ProjectionRegistry.cs    Cached reflection entry point + RegisterGenerated
+│   ├── DynamicQuery.Dapper/             Dapper 2.1.35 lives HERE, not in Core
+│   │   └── DapperProjectionExtensions.cs   QueryProjectionAsync<T> + BuildSql<T>
+│   └── DynamicQuery.SourceGenerator/
+│       └── ProjectionSourceGenerator.cs Roslyn IIncrementalGenerator; [ModuleInitializer] pre-registration
 └── tests/
     └── DynamicQuery.Core.Tests/
         ├── DynamicQuery.Core.Tests.csproj      xUnit
-        └── ProjectionRegistryTests.cs          Coverage on emission shape
+        ├── ProjectionRegistryTests.cs          Coverage on emission shape
+        └── GeneratorByteIdentityTests.cs       Generator output == reflection output, byte-for-byte
 ```
+
+**`DynamicQuery.Dapper` has NO test project.** `BuildSql<T>` — which composes the
+entire `WHERE` / `ORDER BY` / `LIMIT` surface — has zero coverage.
 
 ## Architectural conventions
 
@@ -154,6 +167,38 @@ live in `%USERPROFILE%\private\local.md`.
   every subsequent read. `ProjectionDescriptor`'s constructor takes its
   fields by value; properties are get-only. Don't add a mutation API
   unless you're also adding a separate non-cached builder path.
+
+- **THIS LIBRARY IS BLIND TO ORM METADATA, DELIBERATELY — AND THAT HAS A SHARP
+  EDGE ON SORTS (banked 2026-08-09).** The library reads exactly one thing off a
+  member: `prop.Name`, used as a SQL alias. `PropertyInfo.PropertyType` appears
+  nowhere in the codebase. That is hard rule 2 working as intended — plain
+  strings out, no ORM coupling — but it means there is **no metadata channel
+  through which an EF value converter could ever be discovered**, and one
+  consequence is worth stating loudly because it is silent:
+  **a converted enum sorted through this library sorts by its PROVIDER type.**
+  `HasConversion<string>()` stores `Fermenting`/`Bottled`/`Dumped` as text, so
+  `orderBy: "b.status"` returns alphabetical order, not lifecycle order. EF's own
+  LINQ has the same behaviour — but EF at least *holds* the `IProperty` and its
+  converter and could reason about it. Here there is nothing to reason with, no
+  warning, and no fix short of hand-written `ORDER BY CASE ... END`.
+  Sisters, same root: a strongly-typed ID (`readonly record struct FooId(Guid)`)
+  or a multi-property value object emits perfectly valid SQL and then **fails at
+  Dapper materialization**, because this library ships no `SqlMapper.TypeHandler<T>`
+  and never inspects the target type. Nested member access (`Volume.Amount`)
+  does not exist — `BuildSelectColumns` iterates top-level properties with no
+  recursion, so the intended shape is a FLAT read DTO of scalars Dapper can bind.
+  **Rule: document supported property shapes; do not try to teach the library
+  about converters.** Teaching it would mean depending on `IModel`, which is
+  hard rule 2 in the bin. The honest fix is a docs statement plus fixtures that
+  pin what actually happens for an enum, a struct ID, and a value object —
+  none of which exist in the test suite today (every fixture is `Guid` + `string`).
+
+- **`orderBy` and `where` are concatenated into the SQL unvalidated**
+  (`DapperProjectionExtensions.BuildSql<T>`). Attribute values are compile-time
+  constants so the attribute surface is low-risk, but `orderBy` is exactly the
+  parameter applications wire to user input, and nothing here guards it. It also
+  has no test coverage of any kind. Treat both as caller-trusted SQL and say so
+  in the docs, or guard it — but do not leave it undocumented and untested.
 
 ## Heritage
 
