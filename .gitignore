@@ -48,9 +48,9 @@ local.md
 
 # AI-authored one-shot dev_ops scripts (per Recto Hard Rule #10 they
 # self-delete after success; the .gitignore is belt-and-suspenders so
-# `git add -A` never stages a transient gscript into a real commit).
-gscript_*.ps1
-gscript.ps1
+# `git add -A` never stages a transient one-shot into a real commit).
+# The gscript_*.ps1 / gscript.ps1 rules went with the family, 2026-08-16 —
+# pushes ride the compiled `thrice` tool, which leaves no per-sprint artifact.
 faxscript_*.ps1
 dscript_*.ps1
 tscript_*.ps1
